@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# env files (keep .env.example only)
+.env
+.env.local
+.env.*.local
+
+# build output
+dist/
+build/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# lock files (optional, uncomment if using single package manager)
+# package-lock.json
+# pnpm-lock.yaml
