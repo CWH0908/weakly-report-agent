@@ -1,5 +1,6 @@
 import { chatActions } from '../stores/chatStore';
 import { GitAnalysisResult } from '../types';
+import { ENABLE_MOCK, createMockSSEConnection } from './mock';
 
 export interface SSEOptions {
   messages: Array<{ role: string; content: string }>;
@@ -11,6 +12,10 @@ export interface SSEOptions {
 }
 
 export function createSSEConnection(options: SSEOptions): () => void {
+  if (ENABLE_MOCK) {
+    return createMockSSEConnection(options);
+  }
+
   const { messages, gitData, isInitial, onChunk, onError, onComplete } = options;
 
   const abortController = new AbortController();

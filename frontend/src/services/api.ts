@@ -1,4 +1,5 @@
 import { GitConfig, GitAnalysisResult } from '../types';
+import { ENABLE_MOCK, getMockGitData } from './mock';
 
 const API_BASE = '/api';
 
@@ -7,6 +8,11 @@ export async function analyzeGit(config: GitConfig): Promise<{
   data?: GitAnalysisResult;
   error?: string;
 }> {
+  if (ENABLE_MOCK) {
+    await new Promise(r => setTimeout(r, 800));
+    return { success: true, data: getMockGitData(config) };
+  }
+
   const response = await fetch(`${API_BASE}/git/analyze`, {
     method: 'POST',
     headers: {
