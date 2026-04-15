@@ -1,155 +1,231 @@
-# 周报AI助手
+# 周报AI助手 (Weekly Report Agent)
 
-基于Git记录自动生成工作周报，支持AI对话式精修。
+基于 Git 记录自动生成工作周报的 AI Agent，支持流式对话精修。
 
 ## 功能特性
 
-- 🤖 **AI智能生成**: 使用免费大模型（Gemma 3 27B、Llama 3.3等）自动生成周报
-- 💬 **流式对话**: 基于AntdX ProChat的实时流式对话界面
-- 📊 **Git分析**: 自动分析Git提交记录，按类型分类（feature/fix/docs等）
-- 🎯 **多轮精修**: 通过自然语言对话精修周报内容
-- 📥 **一键导出**: 导出Markdown格式的周报文件
+- **AI 智能生成** — 基于 Git 提交记录，使用大模型自动生成结构化周报
+- **流式对话** — SSE 实时流式输出，逐字呈现生成内容
+- **Git 分析** — 自动分析提交记录，按类型分类（feature / fix / docs / refactor / test）
+- **多轮精修** — 通过自然语言对话持续优化周报内容
+- **模型降级** — 5 个免费模型自动切换，保证可用性
+- **一键导出** — 导出 Markdown 格式的周报文件
 
 ## 技术栈
 
-- **前端**: React 18 + TypeScript + Rspack + Ant Design X (AntdX)
-- **状态管理**: Valtio
-- **后端**: Express.js + TypeScript
-- **AI框架**: Vercel AI SDK + OpenRouter
-- **Git操作**: simple-git
+| 层级 | 技术选型 |
+|------|----------|
+| 前端框架 | React 18 + TypeScript |
+| 构建工具 | Rspack |
+| UI 组件 | Ant Design + Ant Design X |
+| 状态管理 | Valtio |
+| 后端框架 | Express.js + TypeScript |
+| AI 框架 | Vercel AI SDK + OpenRouter |
+| Git 操作 | simple-git |
+| 流式协议 | SSE (Server-Sent Events) |
 
 ## 快速开始
 
 ### 1. 安装依赖
 
 ```bash
-# 安装所有依赖（前端+后端+根目录）
 npm run install:all
 ```
 
-### 2. 配置AI模型
-
-支持两种方式配置AI模型：
-
-#### 方式一：OpenRouter（推荐，支持多模型）
+### 2. 配置环境变量
 
 ```bash
 cd backend
 cp .env.example .env
-# 编辑 .env 文件
+```
+
+编辑 `backend/.env`，填入 OpenRouter API Key：
+
+```
 OPENROUTER_API_KEY=sk-or-v1-your-key-here
 ```
 
-获取免费API Key: https://openrouter.ai/keys
-
-支持的免费模型：
-- `google/gemma-3-27b-it:free` (默认)
-- `meta-llama/llama-3.3-70b-instruct:free`
-- `qwen/qwen-2.5-72b-instruct:free` (Qwen)
-
-#### 方式二：阿里云百炼Qwen（国内访问更快）
-
-```bash
-# 编辑 .env 文件
-DASHSCOPE_API_KEY=sk-your-dashscope-key-here
-```
-
-获取API Key: https://bailian.console.aliyun.com/
-
-然后修改 `backend/src/services/aiClient.ts` 使用Qwen：
-```typescript
-// 导入Qwen客户端
-import { qwenClient } from './qwenClient.js';
-
-// 在streamChat中使用
-const result = streamText({
-  model: qwenClient('qwen-turbo'), // 或 qwen-max, qwen-plus
-  // ...
-});
-```
+获取免费 API Key: https://openrouter.ai/keys
 
 ### 3. 启动开发服务器
 
 ```bash
-# 在根目录同时启动前后端
 npm run dev
 ```
 
 - 前端: http://localhost:5173
 - 后端: http://localhost:3001
 
-## 使用指南
+## 使用流程
 
-1. **输入Git路径**: 在左侧面板输入本地Git项目路径
-2. **选择时间范围**: 默认本周，可切换为上周或自定义
-3. **分析Git记录**: 点击按钮，系统自动分析提交记录
-4. **生成周报**: 点击"生成周报"，AI开始流式生成内容
-5. **对话精修**: 在对话框输入指令精修周报，如：
-   - "补充技术细节"
-   - "简化描述内容"
-   - "突出重点项目A"
-6. **导出周报**: 点击右上角"导出"按钮保存Markdown文件
+1. **输入 Git 路径** — 在左侧面板输入本地 Git 项目的绝对路径
+2. **选择时间范围** — 默认本周，可切换为上周或自定义日期
+3. **分析 Git 记录** — 点击按钮，系统自动分析提交记录并展示统计
+4. **AI 生成周报** — 分析完成后自动触发 AI 流式生成周报内容
+5. **对话精修** — 在对话框输入指令精修周报，如："补充技术细节"、"简化描述"、"突出项目A"
+6. **导出周报** — 点击导出按钮保存 Markdown 文件
 
 ## 项目结构
 
 ```
-Project_3/
-├── frontend/              # 前端React应用
+weakly-report-agent/
+├── package.json                  # 根 monorepo 脚本 (concurrently)
+├── frontend/                     # 前端 React 应用
+│   ├── rspack.config.js          # Rspack 构建配置 + /api 代理
 │   ├── src/
-│   │   ├── components/    # 组件
-│   │   ├── stores/        # Valtio状态管理
-│   │   ├── services/      # API服务
-│   │   └── types/         # TypeScript类型
+│   │   ├── main.tsx              # React 入口
+│   │   ├── App.tsx               # 根组件 (Ant Design Layout)
+│   │   ├── components/
+│   │   │   ├── GitConfigForm/    # Git 配置表单
+│   │   │   ├── WeeklyReportChat/ # AI 对话主界面
+│   │   │   └── ReportPreview/    # Markdown 渲染组件
+│   │   ├── stores/
+│   │   │   └── chatStore.ts      # Valtio 全局状态
+│   │   ├── services/
+│   │   │   ├── api.ts            # REST API 调用
+│   │   │   └── sse.ts            # SSE 流式连接管理
+│   │   └── types/
 │   └── package.json
-├── backend/               # 后端Express应用
+├── backend/                      # 后端 Express 应用
 │   ├── src/
-│   │   ├── routes/        # API路由
-│   │   ├── services/      # 业务服务
-│   │   └── types/         # 类型定义
+│   │   ├── index.ts              # Express 入口
+│   │   ├── routes/
+│   │   │   ├── chat.ts           # SSE 流式聊天路由
+│   │   │   ├── git.ts            # Git 分析路由
+│   │   │   └── report.ts         # 周报导出路由
+│   │   ├── services/
+│   │   │   ├── aiClient.ts       # OpenRouter AI 客户端 (模型降级)
+│   │   │   ├── gitAnalyzer.ts    # Git 提交分析器
+│   │   │   ├── promptBuilder.ts  # 提示词构建器
+│   │   │   └── qwenClient.ts     # 阿里云 Qwen 备选客户端
+│   │   └── types/
+│   ├── .env.example              # 环境变量模板
 │   └── package.json
-└── package.json           # 根目录脚本
+└── .gitignore
 ```
 
-## API说明
+## 架构设计
 
-### Git分析
-```bash
+### 数据流
+
+```
+用户配置 Git 路径/日期
+    │
+    ▼
 POST /api/git/analyze
+    │  simple-git: git log + git show --stat
+    │  按 commit message 关键词自动分类
+    ▼
+返回 GitAnalysisResult → 存入 Valtio Store
+    │
+    ▼ 自动触发
+POST /api/chat/stream (SSE)
+    │  promptBuilder 构建系统提示词 + 格式化 Git 数据
+    │  aiClient.streamWithFallback() 逐模型尝试
+    ▼
+SSE 流: data: {"chunk": "文本片段"}\n\n
+    │  前端逐 chunk 追加到 Store → UI 实时更新
+    ▼
+data: {"done": true}\n\n → 生成完成
+    │
+    ▼ 用户输入修改指令
+POST /api/chat/stream (携带完整消息历史, isInitial=false)
+    │  多轮对话精修
+    ▼
+导出 → POST /api/report/export → 下载 Markdown 文件
+```
+
+### SSE 流式协议
+
+选择 SSE 而非 WebSocket 的原因：AI 生成是单向服务器推送场景，SSE 更简单。
+
+由于需要 POST 请求体传递消息历史，前端使用 `fetch()` + `ReadableStream` 手动解析 SSE 协议（浏览器原生 `EventSource` 只支持 GET）。
+
+后端 SSE 加固措施：
+- 15 秒心跳保活，防止代理/浏览器断开空闲连接
+- 60 秒超时保护，防止无限等待
+- `X-Accel-Buffering: no` 禁用 Nginx 缓冲
+
+### 模型降级策略
+
+5 个免费模型组成降级队列，逐个尝试：
+
+| 优先级 | 模型 | 提供商 |
+|--------|------|--------|
+| 1 (默认) | google/gemma-4-31b-it:free | Google |
+| 2 | nvidia/nemotron-3-super-120b-a12b:free | NVIDIA |
+| 3 | meta-llama/llama-3.3-70b-instruct:free | Meta |
+| 4 | mistralai/mistral-small-3.1-24b-instruct:free | Mistral |
+| 5 | qwen/qwen3-next-80b-a3b-instruct:free | Alibaba |
+
+关键设计：`maxRetries: 0` 禁用 Vercel AI SDK 内置重试（默认会指数退避重试 3 次），由应用层控制快速切换，避免单模型失败导致分钟级卡顿。
+
+### Git 提交分类规则
+
+基于 commit message 前缀/关键词自动分类，同时支持中英文：
+
+| 分类 | 英文关键词 | 中文关键词 |
+|------|-----------|-----------|
+| feature | feat, feature | 新增, 添加 |
+| fix | fix, bugfix | 修复, 解决 |
+| docs | docs, readme | 文档 |
+| refactor | refactor | 重构, 优化 |
+| test | test, tests | 测试 |
+| other | 其余 | 其余 |
+
+## API 接口
+
+### Git 分析
+
+```http
+POST /api/git/analyze
+Content-Type: application/json
+
 {
-  "repoPath": "/path/to/repo",
-  "since": "2025-04-01",
-  "until": "2025-04-07",
-  "author": "optional-author"
+  "repoPath": "D:\\projects\\my-repo",
+  "since": "2026-04-07",
+  "until": "2026-04-13",
+  "author": "optional-author-name"
 }
 ```
 
-### AI对话流
-```bash
+### AI 对话流
+
+```http
 POST /api/chat/stream
+Content-Type: application/json
+
 {
-  "messages": [...],
-  "gitData": {...},
+  "messages": [{"role": "user", "content": "..."}],
+  "gitData": { ... },
   "isInitial": true
 }
-# SSE流式响应
+
+# SSE 响应
+data: {"chunk": "# 本周工作总结\n\n"}
+data: {"chunk": "## 新功能开发\n"}
+...
+data: {"done": true}
 ```
 
 ### 导出周报
-```bash
+
+```http
 POST /api/report/export
+Content-Type: application/json
+
 {
   "content": "# 周报内容...",
-  "filename": "周报_2025-04-11.md"
+  "filename": "周报_2026-04-13.md"
 }
 ```
 
-## 免费模型推荐
+## 备选方案：阿里云百炼 Qwen
 
-| 模型 | 提供商 | 说明 |
-|------|--------|------|
-| google/gemma-3-27b-it:free | Google | 推荐，性能优秀 |
-| meta-llama/llama-3.3-70b-instruct:free | Meta | 备选，多语言支持好 |
-| qwen/qwen-2.5-72b-instruct:free | 阿里 | 中文能力强 |
+项目内置了阿里云百炼 Qwen 客户端 (`qwenClient.ts`)，适合国内网络环境。启用方式：
+
+1. 在 `.env` 中配置 `DASHSCOPE_API_KEY`
+2. 修改 `aiClient.ts` 中的模型调用为 Qwen 客户端
 
 ## License
 
