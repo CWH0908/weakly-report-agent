@@ -1,0 +1,93 @@
+// ============================================
+// 全局变量和主题定义
+// 明亮浅蓝主题 (Light Azure)
+// ============================================
+
+// 核心色板 - 清新浅蓝色系
+$blue-100: #e0f2fe;
+$blue-200: #bae6fd;
+$blue-300: #7dd3fc;
+$blue-400: #38bdf8;
+$blue-500: #0ea5e9;
+$blue-600: #0284c7;
+
+// 辅助色 - 淡紫/薰衣草色
+$violet-100: #ede9fe;
+$violet-200: #ddd6fe;
+$violet-300: #c4b5fd;
+$violet-400: #a78bfa;
+$violet-500: #8b5cf6;
+
+// 点缀色
+$cyan-300: #67e8f9;
+$cyan-400: #22d3ee;
+
+// 渐变色 - 浅蓝起始，淡紫结束
+$gradient-primary: linear-gradient(135deg, $blue-400 0%, $violet-400 100%);
+$gradient-secondary: linear-gradient(135deg, $blue-500 0%, $violet-500 100%);
+$gradient-soft: linear-gradient(135deg, $blue-100 0%, $violet-100 100%);
+$gradient-accent: linear-gradient(135deg, $cyan-400 0%, $blue-400 100%);
+$gradient-text: linear-gradient(90deg, $blue-500 0%, $violet-500 100%);
+
+// 背景色 - 明亮柔和
+$bg-base: #f8fafc;
+$bg-soft: #f1f5f9;
+$bg-muted: #e2e8f0;
+$bg-white: #ffffff;
+$bg-glass: rgba(255, 255, 255, 0.7);
+$bg-glass-light: rgba(255, 255, 255, 0.85);
+$bg-glass-hover: rgba(255, 255, 255, 0.95);
+$bg-blue-tint: rgba(14, 165, 233, 0.04);
+$bg-violet-tint: rgba(139, 92, 246, 0.03);
+
+// 文字色 - 深色文字在浅色背景
+$text-primary: #0f172a;
+$text-secondary: #475569;
+$text-tertiary: #94a3b8;
+$text-muted: #cbd5e1;
+
+// 边框色
+$border-light: rgba(0, 0, 0, 0.06);
+$border-default: rgba(0, 0, 0, 0.1);
+$border-hover: rgba(0, 0, 0, 0.15);
+$border-blue: rgba($blue-500, 0.3);
+
+// 阴影 - 柔和明亮
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+$shadow-blue: 0 4px 20px rgba($blue-500, 0.2);
+$shadow-violet: 0 4px 20px rgba($violet-500, 0.15);
+$shadow-glow: 0 0 40px rgba($blue-400, 0.15);
+
+// 圆角
+$radius-xs: 6px;
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 20px;
+$radius-2xl: 24px;
+$radius-full: 9999px;
+
+// 动画
+$transition-fast: 0.15s ease;
+$transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// 字体
+$font-display: 'Plus Jakarta Sans', 'Noto Sans SC', system-ui, sans-serif;
+$font-body: 'Plus Jakarta Sans', 'Noto Sans SC', system-ui, sans-serif;
+
+// 断点
+$breakpoint-sm: 480px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+
+// 导出变量供 CSS Modules 使用
+:export {
+  blue500: $blue-500;
+  violet500: $violet-500;
+  bgBase: $bg-base;
+}

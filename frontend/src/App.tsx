@@ -1,131 +1,235 @@
-import React, { useState } from 'react';
-import { Layout, Card, theme, Typography, Divider, Alert, Space } from 'antd';
-import { RobotOutlined, GithubOutlined } from '@ant-design/icons';
+import React, { useState, useCallback } from 'react';
+import { ConfigProvider, message } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+import { Sender } from '@ant-design/x';
 import { useSnapshot } from 'valtio';
 import { chatStore, chatActions } from './stores/chatStore';
-import GitConfigForm from './components/GitConfigForm/index';
-import WeeklyReportChat from './components/WeeklyReportChat/index';
 import { GitAnalysisResult } from './types';
+import { sendConversation } from './services/sse';
+import { analyzeGit, exportReport, downloadReport } from './services/api';
 
-const { Header, Content, Sider } = Layout;
-const { Title, Text } = Typography;
+// 组件
+import Header from './components/Header';
+import WelcomeScreen from './components/WelcomeScreen';
+import ChatMessages from './components/ChatMessages';
+import PathModal from './components/PathModal';
+
+// 样式
+import './styles/global.scss';
+import * as styles from './styles/App.module.scss';
 
 const App: React.FC = () => {
-  const { token } = theme.useToken();
   const snapshot = useSnapshot(chatStore);
-  const [analysisSuccess, setAnalysisSuccess] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [pathModalOpen, setPathModalOpen] = useState(false);
+  const [repoPath, setRepoPath] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
 
-  const handleAnalysisComplete = (data: GitAnalysisResult) => {
-    setAnalysisSuccess(true);
-    // 清空之前的对话记录
-    chatActions.clearMessages();
-  };
+  // 打开路径输入对话框
+  const handleOpenPathModal = useCallback(() => {
+    setPathModalOpen(true);
+  }, []);
+
+  // 分析项目
+  const handleAnalyze = useCallback(async () => {
+    if (!repoPath.trim()) {
+      message.warning('请输入项目路径');
+      return;
+    }
+
+    setAnalyzing(true);
+    setPathModalOpen(false);
+
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const since = monday.toISOString().split('T')[0];
+    const until = sunday.toISOString().split('T')[0];
+
+    chatActions.addUserMessage(`分析项目: ${repoPath}`);
+    const messageId = chatActions.startAssistantMessage();
+    chatActions.appendAssistantContent(messageId, `正在分析 **${repoPath}** ...\n\n`);
+
+    try {
+      const result = await analyzeGit({
+        repoPath: repoPath.trim(),
+        since,
+        until,
+      });
+
+      if (result.success && result.data) {
+        const gitData = result.data;
+        chatActions.setGitData(gitData);
+        chatActions.setGitConfig({
+          repoPath: gitData.repoPath,
+          since: gitData.dateRange.since,
+          until: gitData.dateRange.until,
+        });
+
+        chatActions.appendAssistantContent(
+          messageId,
+          `✅ 分析完成！\n\n**项目**: ${gitData.repoName}\n**时间**: ${gitData.dateRange.since} ~ ${gitData.dateRange.until}\n**提交数**: ${gitData.summary.totalCommits}\n**代码变更**: +${gitData.summary.totalAdditions} / -${gitData.summary.totalDeletions}\n\n现在你可以说"生成周报"来创建周报。`
+        );
+      } else {
+        chatActions.appendAssistantContent(messageId, `❌ 分析失败: ${result.error || '未知错误'}`);
+      }
+    } catch (err) {
+      chatActions.appendAssistantContent(messageId, `❌ 分析失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      chatActions.finishAssistantMessage(messageId);
+      setAnalyzing(false);
+    }
+  }, [repoPath]);
+
+  // 发送消息
+  const handleSend = useCallback(async (msg?: string) => {
+    const text = msg || inputValue.trim();
+    if (!text || snapshot.isStreaming) return;
+    
+    setInputValue('');
+
+    try {
+      await sendConversation(
+        text,
+        {
+          repoPath: snapshot.gitConfig?.repoPath,
+          gitData: snapshot.gitData ?? undefined,
+          messages: snapshot.messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        },
+        {
+          onAction: (action) => {
+            if (action === 'select_folder') {
+              handleOpenPathModal();
+            }
+          },
+          onGitData: (gitData: GitAnalysisResult) => {
+            chatActions.setGitData(gitData);
+            chatActions.setGitConfig({
+              repoPath: gitData.repoPath,
+              since: gitData.dateRange.since,
+              until: gitData.dateRange.until,
+            });
+          },
+        }
+      );
+    } catch (err) {
+      // error已在store中处理
+    }
+  }, [inputValue, snapshot.isStreaming, snapshot.gitConfig, snapshot.gitData, snapshot.messages, handleOpenPathModal]);
+
+  // 导出周报
+  const handleExport = useCallback(async () => {
+    const lastAssistantMessage = [...snapshot.messages]
+      .reverse()
+      .find((m) => m.role === 'assistant' && !m.isStreaming);
+
+    if (!lastAssistantMessage) return;
+
+    setExporting(true);
+    try {
+      const result = await exportReport(lastAssistantMessage.content);
+      if (result.success && result.downloadUrl) {
+        downloadReport(result.downloadUrl);
+        message.success('导出成功');
+      }
+    } finally {
+      setExporting(false);
+    }
+  }, [snapshot.messages]);
+
+  // 清空对话
+  const handleClear = useCallback(() => {
+    chatActions.reset();
+  }, []);
+
+  const hasMessages = snapshot.messages.length > 0;
+  const canExport = !!snapshot.messages.find((m) => m.role === 'assistant' && !m.isStreaming);
 
   return (
-    <Layout style={{ minHeight: '100vh', background: token.colorBgContainer }}>
-      {/* 头部 */}
-      <Header
-        style={{
-          background: token.colorBgContainer,
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-        }}
-      >
-        <Space align="center">
-          <RobotOutlined style={{ fontSize: '24px', color: token.colorPrimary }} />
-          <Title level={4} style={{ margin: 0 }}>
-            周报AI助手
-          </Title>
-        </Space>
-        <Text type="secondary" style={{ marginLeft: 'auto' }}>
-          基于Git记录自动生成周报
-        </Text>
-      </Header>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        token: {
+          colorPrimary: '#0ea5e9',
+          colorInfo: '#0ea5e9',
+          borderRadius: 12,
+          fontFamily: "'Plus Jakarta Sans', 'Noto Sans SC', system-ui, sans-serif",
+          colorBgContainer: '#ffffff',
+          colorText: '#0f172a',
+          colorTextSecondary: '#475569',
+        },
+      }}
+    >
+      <div className={styles.container}>
+        {/* 动态背景 */}
+        <div className={styles.bgGradient} />
+        <div className={styles.bgOrbs}>
+          <div className={`${styles.orb} ${styles.orb1}`} />
+          <div className={`${styles.orb} ${styles.orb2}`} />
+          <div className={`${styles.orb} ${styles.orb3}`} />
+        </div>
+        <div className={styles.bgGrid} />
 
-      <Layout>
-        {/* 左侧配置面板 */}
-        <Sider
-          width={360}
-          style={{
-            background: token.colorBgContainer,
-            borderRight: `1px solid ${token.colorBorderSecondary}`,
-          }}
-        >
-          <GitConfigForm onAnalysisComplete={handleAnalysisComplete} />
+        {/* 路径输入对话框 */}
+        <PathModal
+          open={pathModalOpen}
+          value={repoPath}
+          onChange={setRepoPath}
+          onOk={handleAnalyze}
+          onCancel={() => setPathModalOpen(false)}
+          loading={analyzing}
+        />
 
-          {snapshot.gitData && (
-            <>
-              <Divider style={{ margin: '0' }} />
-              <div style={{ padding: '16px' }}>
-                <Text strong style={{ fontSize: '14px', display: 'block', marginBottom: '12px' }}>
-                  分析结果
-                </Text>
-                <Alert
-                  message={snapshot.gitData.repoName}
-                  description={
-                    <Space direction="vertical" size={0}>
-                      <Text>提交数: {snapshot.gitData.summary.totalCommits}</Text>
-                      <Text>
-                        代码变更: +{snapshot.gitData.summary.totalAdditions} / -
-                        {snapshot.gitData.summary.totalDeletions}
-                      </Text>
-                      <Text>文件变更: {snapshot.gitData.summary.filesChanged.length} 个</Text>
-                    </Space>
-                  }
-                  type="info"
-                  showIcon
-                />
-              </div>
-            </>
-          )}
-        </Sider>
+        {/* 头部 */}
+        <Header
+          projectName={snapshot.gitData?.repoName}
+          onSelectProject={handleOpenPathModal}
+          onExport={handleExport}
+          onClear={handleClear}
+          isAnalyzing={analyzing}
+          isExporting={exporting}
+          isStreaming={snapshot.isStreaming}
+          canExport={canExport}
+          canClear={hasMessages}
+        />
 
-        {/* 右侧对话区域 */}
-        <Content style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
-          {snapshot.gitData ? (
-            <WeeklyReportChat gitData={snapshot.gitData} />
-          ) : (
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '48px',
-              }}
-            >
-              <RobotOutlined style={{ fontSize: '64px', color: token.colorBorder }} />
-              <Title level={4} style={{ marginTop: '24px', color: token.colorTextSecondary }}>
-                欢迎使用周报AI助手
-              </Title>
-              <Text type="secondary" style={{ textAlign: 'center', maxWidth: '400px' }}>
-                请在左侧配置Git项目路径和时间范围，点击"分析Git记录"开始生成周报
-              </Text>
-              <div style={{ marginTop: '24px' }}>
-                <Alert
-                  message="使用说明"
-                  description={
-                    <ol style={{ paddingLeft: '16px', margin: 0 }}>
-                      <li>输入本地Git项目的路径</li>
-                      <li>选择需要分析的时间范围</li>
-                      <li>点击"分析Git记录"按钮</li>
-                      <li>AI将自动生成周报初稿</li>
-                      <li>通过对话方式精修周报内容</li>
-                      <li>导出Markdown格式周报</li>
-                    </ol>
-                  }
-                  type="info"
-                  style={{ maxWidth: '400px' }}
-                />
-              </div>
+        {/* 主内容区 */}
+        <main className={styles.main}>
+          <div className={styles.chatContainer}>
+            {hasMessages ? (
+              <ChatMessages />
+            ) : (
+              <WelcomeScreen
+                onSelectProject={handleOpenPathModal}
+                onHelp={() => handleSend('帮助')}
+              />
+            )}
+          </div>
+        </main>
+
+        {/* 底部输入区 */}
+        <footer className={styles.footer}>
+          <div className={styles.inputWrapper}>
+            <div className={styles.chatSender}>
+              <Sender
+                value={inputValue}
+                onChange={setInputValue}
+                onSubmit={() => handleSend()}
+                loading={snapshot.isStreaming}
+                placeholder='输入指令...'
+              />
             </div>
-          )}
-        </Content>
-      </Layout>
-    </Layout>
+          </div>
+        </footer>
+      </div>
+    </ConfigProvider>
   );
 };
 

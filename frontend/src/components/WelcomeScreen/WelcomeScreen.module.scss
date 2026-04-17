@@ -1,0 +1,338 @@
+@use '../../styles/variables' as *;
+
+.container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.content {
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  
+  @media (min-width: $breakpoint-lg) {
+    max-width: 520px;
+  }
+}
+
+// 图标容器
+.iconWrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 36px;
+  
+  @media (max-width: $breakpoint-md) {
+    width: 170px;
+    height: 170px;
+    margin-bottom: 30px;
+  }
+}
+
+// 代码流容器 - 撑满整个宽度
+.codeRain {
+  position: absolute;
+  top: -40px;
+  bottom: -40px;
+  left: -80px;
+  right: -80px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+// 代码流列 - 更大更明显
+.codeColumn {
+  position: absolute;
+  top: -120%;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+  animation: codeFlow linear infinite;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 11px;
+  }
+}
+
+// 主要列 - 亮色高速
+.colBright {
+  color: $blue-400;
+  text-shadow: 
+    0 0 10px $blue-400,
+    0 0 20px rgba($blue-400, 0.5),
+    0 0 30px rgba($blue-400, 0.3);
+}
+
+// 次要列 - 中等亮度
+.colMedium {
+  color: rgba($violet-400, 0.85);
+  text-shadow: 
+    0 0 8px $violet-400,
+    0 0 16px rgba($violet-400, 0.4);
+}
+
+// 背景列 - 较暗
+.colDim {
+  color: rgba($blue-300, 0.5);
+  text-shadow: 0 0 6px rgba($blue-300, 0.3);
+}
+
+// 各列位置和速度 - 更分散
+.col1 { left: 0%; animation-duration: 2.8s; }
+.col2 { left: 8%; animation-duration: 3.5s; animation-delay: -0.5s; }
+.col3 { left: 16%; animation-duration: 2.5s; animation-delay: -1.2s; }
+.col4 { left: 24%; animation-duration: 3.2s; animation-delay: -0.3s; }
+.col5 { left: 32%; animation-duration: 2.9s; animation-delay: -1.8s; }
+.col6 { left: 40%; animation-duration: 3.8s; animation-delay: -0.8s; }
+.col7 { left: 48%; animation-duration: 2.6s; animation-delay: -1.5s; }
+.col8 { left: 56%; animation-duration: 3.3s; animation-delay: -0.2s; }
+.col9 { left: 64%; animation-duration: 2.7s; animation-delay: -2s; }
+.col10 { left: 72%; animation-duration: 3.6s; animation-delay: -1s; }
+.col11 { left: 80%; animation-duration: 2.4s; animation-delay: -0.6s; }
+.col12 { left: 88%; animation-duration: 3.1s; animation-delay: -1.3s; }
+
+@keyframes codeFlow {
+  0% {
+    top: -120%;
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+// 头部字符高亮效果
+.codeColumn::first-letter {
+  color: white;
+  text-shadow: 
+    0 0 15px currentColor,
+    0 0 30px currentColor;
+}
+
+// 主图标 - 呼吸动画
+.icon {
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba($blue-500, 0.95) 0%, rgba($violet-500, 0.95) 100%);
+  border-radius: 22px;
+  font-size: 34px;
+  color: white;
+  z-index: 10;
+  box-shadow: 
+    0 8px 40px rgba($blue-500, 0.5),
+    0 0 60px rgba($blue-400, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  backdrop-filter: blur(10px);
+  animation: iconBreath 3s ease-in-out infinite;
+  
+  @media (max-width: $breakpoint-md) {
+    width: 66px;
+    height: 66px;
+    border-radius: 18px;
+    font-size: 30px;
+  }
+}
+
+@keyframes iconBreath {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 
+      0 8px 40px rgba($blue-500, 0.5),
+      0 0 60px rgba($blue-400, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    box-shadow: 
+      0 12px 50px rgba($blue-500, 0.6),
+      0 0 80px rgba($blue-400, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  }
+}
+
+// 图标外圈光晕 - 同步呼吸
+.icon::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 28px;
+  background: $gradient-secondary;
+  z-index: -1;
+  opacity: 0.4;
+  filter: blur(16px);
+  animation: glowBreath 3s ease-in-out infinite;
+}
+
+@keyframes glowBreath {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+  color: $text-primary;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+}
+
+.gradientText {
+  background: $gradient-text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: $text-secondary;
+  margin-bottom: 32px;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+}
+
+.quickActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+}
+
+.quickBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: $gradient-secondary;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: $transition-normal;
+  box-shadow: $shadow-blue;
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba($blue-500, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0) scale(1);
+  }
+  
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    padding: 11px 18px;
+  }
+}
+
+.tipsCard {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba($blue-400, 0.12);
+  border-radius: $radius-lg;
+  padding: 18px;
+  text-align: left;
+  box-shadow: $shadow-sm;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 14px;
+    border-radius: $radius-md;
+  }
+}
+
+.tipsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-primary;
+  
+  :global(.anticon) {
+    color: #f59e0b;
+  }
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tipsItem {
+  position: relative;
+  padding: 5px 0 5px 14px;
+  font-size: 12px;
+  color: $text-secondary;
+  line-height: 1.5;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 4px;
+    height: 4px;
+    background: $gradient-secondary;
+    border-radius: 50%;
+  }
+}

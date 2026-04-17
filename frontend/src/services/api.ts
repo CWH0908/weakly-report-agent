@@ -13,15 +13,29 @@ export async function analyzeGit(config: GitConfig): Promise<{
     return { success: true, data: getMockGitData(config) };
   }
 
-  const response = await fetch(`${API_BASE}/git/analyze`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(config),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/git/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify(config),
+    });
 
-  return response.json();
+    if (!response.ok) {
+      const text = await response.text();
+      try {
+        const json = JSON.parse(text);
+        return { success: false, error: json.error || `HTTP ${response.status}` };
+      } catch {
+        return { success: false, error: text || `HTTP ${response.status}` };
+      }
+    }
+
+    return response.json();
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : '请求失败' };
+  }
 }
 
 export async function exportReport(

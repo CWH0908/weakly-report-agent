@@ -1,0 +1,210 @@
+// ============================================
+// 全局基础样式和重置
+// 明亮浅蓝主题
+// ============================================
+@use 'variables' as *;
+
+// Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+// Reset
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  height: 100%;
+  font-family: $font-body;
+  background: $bg-base;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+// 全局滚动条样式 - 浅色主题
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba($blue-500, 0.2);
+  border-radius: 3px;
+  
+  &:hover {
+    background: rgba($blue-500, 0.35);
+  }
+}
+
+// Ant Design 覆盖
+.ant-message {
+  z-index: 9999;
+}
+
+.ant-message-notice-content {
+  background: $bg-white !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid $border-light;
+  border-radius: $radius-md !important;
+  box-shadow: $shadow-md;
+  color: $text-primary;
+}
+
+// Modal 全局样式 - 明亮风格
+.ant-modal-root {
+  .ant-modal-mask {
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(8px);
+  }
+  
+  .ant-modal-content {
+    background: $bg-white !important;
+    border: 1px solid $border-light;
+    border-radius: $radius-xl !important;
+    box-shadow: $shadow-lg;
+    overflow: hidden;
+  }
+  
+  .ant-modal-header {
+    background: transparent !important;
+    border: none !important;
+    padding: 24px 24px 16px !important;
+  }
+  
+  .ant-modal-title {
+    color: $text-primary !important;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  
+  .ant-modal-close {
+    color: $text-tertiary;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    
+    &:hover {
+      color: $text-primary;
+      background: $bg-soft;
+      border-radius: 8px;
+    }
+  }
+  
+  .ant-modal-body {
+    color: $text-secondary;
+    padding: 8px 24px 16px !important;
+  }
+  
+  .ant-modal-footer {
+    border: none !important;
+    padding: 12px 24px 24px !important;
+    
+    .ant-btn-primary {
+      background: $gradient-secondary !important;
+      border: none !important;
+      height: 44px;
+      padding: 0 32px;
+      font-weight: 600;
+      border-radius: 12px;
+      color: white !important;
+      box-shadow: $shadow-blue;
+      transition: all 0.25s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba($blue-500, 0.35);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+    
+    .ant-btn-default {
+      background: $bg-soft !important;
+      border: 1px solid $border-default !important;
+      color: $text-secondary !important;
+      height: 44px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: $bg-muted !important;
+        color: $text-primary !important;
+        border-color: $border-hover !important;
+      }
+    }
+  }
+}
+
+// Input 样式 - 无边框融合风格
+.ant-input-affix-wrapper,
+.ant-input {
+  background: transparent !important;
+  border: none !important;
+  color: $text-primary !important;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+  
+  &:hover {
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  &:focus,
+  &-focused {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .ant-input {
+    background: transparent !important;
+    color: $text-primary !important;
+    border: none !important;
+    box-shadow: none !important;
+    
+    &::placeholder {
+      color: $text-tertiary !important;
+    }
+    
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+  
+  .ant-input-prefix {
+    color: $text-tertiary;
+    margin-right: 10px;
+  }
+}
+
+// 单独的 ant-input 元素（非包装器内）
+input.ant-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  
+  &:focus {
+    box-shadow: none !important;
+  }
+}

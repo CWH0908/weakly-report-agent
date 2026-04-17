@@ -191,6 +191,20 @@ const WeeklyReportChat: React.FC<WeeklyReportChatProps> = ({ gitData }) => {
           }}
           style={{ maxHeight: '100%' }}
         />
+        
+        {/* 错误提示 */}
+        {snapshot.error && (
+          <Alert
+            message="请求失败"
+            description={snapshot.error}
+            type="error"
+            showIcon
+            closable
+            onClose={() => chatActions.clearError()}
+            style={{ marginTop: '16px' }}
+          />
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 

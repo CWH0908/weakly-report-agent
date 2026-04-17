@@ -1,0 +1,278 @@
+@use '../../styles/variables' as *;
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease-out;
+  
+  // PC 端使用更大宽度
+  @media (min-width: $breakpoint-lg) {
+    max-width: 960px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  @media (max-width: $breakpoint-md) {
+    gap: 14px;
+  }
+}
+
+.messageItem {
+  display: flex;
+  gap: 12px;
+  animation: slideIn 0.3s ease-out;
+  
+  @media (max-width: $breakpoint-md) {
+    gap: 10px;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.messageUser {
+  flex-direction: row-reverse;
+}
+
+// 头像样式
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  
+  @media (max-width: $breakpoint-md) {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+  }
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarAssistant {
+  background: $gradient-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 18px;
+  }
+}
+
+.avatarUser {
+  background: $gradient-accent;
+}
+
+// 消息气泡 - 自适应内容宽度
+.bubble {
+  display: inline-block;  // 让宽度自适应内容
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: $radius-md;
+  line-height: 1.6;
+  font-size: 14px;
+  word-break: break-word;
+  
+  @media (max-width: $breakpoint-md) {
+    max-width: 85%;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
+
+.bubbleAssistant {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba($blue-400, 0.12);
+  color: $text-primary;
+  border-top-left-radius: $radius-xs;
+  box-shadow: $shadow-sm;
+}
+
+.bubbleUser {
+  background: linear-gradient(135deg, rgba($blue-400, 0.18) 0%, rgba($violet-400, 0.12) 100%);
+  border: 1px solid rgba($blue-400, 0.15);
+  color: $text-primary;
+  border-top-right-radius: $radius-xs;
+}
+
+// 加载动画
+.loadingDots {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: $blue-400;
+  border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite;
+  
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Markdown 内容样式 - 紧凑明亮主题
+.markdownContent {
+  color: $text-primary;
+  font-size: 14px;
+  line-height: 1.6;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 13px;
+  }
+  
+  h1, h2, h3, h4 {
+    color: $text-primary;
+    font-weight: 700;
+    margin: 12px 0 6px;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  
+  h1 { font-size: 1.25em; }
+  h2 { font-size: 1.15em; }
+  h3 { font-size: 1.05em; }
+  
+  p {
+    margin: 5px 0;
+    color: $text-secondary;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  ul, ol {
+    margin: 6px 0;
+    padding-left: 18px;
+    color: $text-secondary;
+  }
+  
+  li {
+    margin: 2px 0;
+  }
+  
+  code {
+    background: rgba($blue-500, 0.08);
+    color: $blue-600;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+  
+  pre {
+    background: $bg-soft !important;
+    border: 1px solid $border-light;
+    border-radius: $radius-sm;
+    margin: 10px 0;
+    overflow-x: auto;
+    
+    code {
+      background: transparent;
+      color: $text-primary;
+      padding: 0;
+    }
+  }
+  
+  strong {
+    color: $text-primary;
+    font-weight: 600;
+  }
+  
+  a {
+    color: $blue-500;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  blockquote {
+    border-left: 3px solid $blue-400;
+    padding-left: 10px;
+    margin: 10px 0;
+    color: $text-secondary;
+    background: rgba($blue-100, 0.5);
+    padding: 8px 10px;
+    border-radius: 0 $radius-sm $radius-sm 0;
+  }
+  
+  hr {
+    border: none;
+    border-top: 1px solid $border-light;
+    margin: 12px 0;
+  }
+}
+
+// 流式输出光标
+.cursor {
+  display: inline-block;
+  color: $blue-500;
+  font-weight: bold;
+  animation: cursorBlink 0.8s ease-in-out infinite;
+  margin-left: 2px;
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+// 错误提示
+.errorAlert {
+  margin-top: 16px;
+  animation: slideIn 0.3s ease-out;
+}

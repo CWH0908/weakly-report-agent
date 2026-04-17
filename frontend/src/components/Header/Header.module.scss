@@ -1,0 +1,187 @@
+@use '../../styles/variables' as *;
+
+// 顶部栏 - 明亮玻璃效果
+.header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.5) 60%,
+    transparent 100%
+  );
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 12px 16px;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Logo 可点击状态
+.brandClickable {
+  cursor: pointer;
+  border-radius: $radius-md;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  transition: $transition-fast;
+  
+  &:hover {
+    background: rgba($blue-500, 0.08);
+    
+    .brandIcon {
+      transform: scale(1.05);
+    }
+  }
+  
+  &:active {
+    background: rgba($blue-500, 0.12);
+  }
+}
+
+// Logo - 渐变设计
+.brandIcon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $gradient-secondary;
+  border-radius: 12px;
+  font-size: 19px;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: $shadow-blue;
+  transition: transform 0.2s ease;
+  
+  @media (max-width: $breakpoint-md) {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+    border-radius: 10px;
+  }
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brandTitle {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: $text-primary;
+  
+  @media (max-width: $breakpoint-md) {
+    font-size: 15px;
+  }
+}
+
+.brandBadge {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: $text-tertiary;
+  
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  @media (max-width: $breakpoint-md) {
+    gap: 4px;
+  }
+}
+
+// 项目标签
+.projectTag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: $text-secondary;
+  background: rgba($blue-500, 0.08);
+  border-radius: $radius-sm;
+  margin-right: 8px;
+  max-width: 160px;
+  
+  span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.tagDot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+// 操作按钮 - 明亮风格
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: $transition-fast;
+  white-space: nowrap;
+  
+  &:hover:not(:disabled) {
+    color: $blue-600;
+    background: rgba($blue-500, 0.08);
+  }
+  
+  &:active:not(:disabled) {
+    background: rgba($blue-500, 0.12);
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 8px 10px;
+  }
+}
+
+.btnText {
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}

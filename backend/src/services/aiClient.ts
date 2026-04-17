@@ -10,12 +10,16 @@ export interface AIStreamOptions {
 
 export class AIClient {
   private openrouter;
-  private defaultModel = 'google/gemma-4-31b-it:free';
+  private defaultModel = 'google/gemini-2.0-flash-exp:free';
   private backupModels = [
-    'nvidia/nemotron-3-super-120b-a12b:free',
+    'qwen/qwen3-235b-a22b:free',        // 千问3 235B
+    'qwen/qwen3-30b-a3b:free',          // 千问3 30B
+    'qwen/qwen-2.5-coder-32b-instruct:free', // 千问2.5 Coder
+    'google/gemma-3-27b-it:free',
     'meta-llama/llama-3.3-70b-instruct:free',
     'mistralai/mistral-small-3.1-24b-instruct:free',
-    'qwen/qwen3-next-80b-a3b-instruct:free',
+    'deepseek/deepseek-r1-0528:free',
+    'microsoft/phi-4-reasoning-plus:free',
   ];
 
   constructor(apiKey?: string) {
@@ -62,8 +66,12 @@ export class AIClient {
         const result = this.createStream({ ...options, model });
 
         let hasOutput = false;
+        let chunkCount = 0;
         for await (const chunk of result.textStream) {
           hasOutput = true;
+          chunkCount++;
+          // 记录所有 chunk 的信息
+          console.log(`[AI] chunk #${chunkCount}: len=${chunk.length}, text="${chunk.slice(0, 50).replace(/\n/g, '\\n')}${chunk.length > 50 ? '...' : ''}"`);
           onChunk(chunk);
         }
 

@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import gitRouter from './routes/git.js';
 import chatRouter from './routes/chat.js';
 import reportRouter from './routes/report.js';
@@ -11,7 +12,27 @@ const PORT = process.env.PORT || 3001;
 
 // 中间件
 app.use(cors());
-app.use(express.json());
+
+// compression 中间件 - 但对 SSE 流禁用压缩（否则会缓冲）
+app.use(compression({
+  filter: (req, res) => {
+    // 对 text/event-stream 禁用压缩，避免缓冲导致流式失效
+    if (req.headers.accept === 'text/event-stream' || 
+        res.getHeader('Content-Type') === 'text/event-stream') {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+// 明确使用 UTF-8 解析 JSON
+app.use(express.json({ 
+  limit: '10mb',
+  type: ['application/json', 'application/json; charset=utf-8']
+}));
+
+// URL encoded body 也使用 UTF-8
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // 路由
 app.use('/api/git', gitRouter);

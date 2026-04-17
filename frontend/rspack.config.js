@@ -15,7 +15,7 @@ module.exports = {
     clean: true,
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.jsx', '.js'],
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.scss', '.css'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
@@ -48,6 +48,18 @@ module.exports = {
         test: /\.css$/,
         type: 'css/auto',
       },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: 'sass-loader',
+            options: {
+              api: 'modern-compiler',
+            },
+          },
+        ],
+        type: 'css/auto',
+      },
     ],
   },
   plugins: [
@@ -65,6 +77,13 @@ module.exports = {
         context: ['/api'],
         target: 'http://localhost:3001',
         changeOrigin: true,
+        // 确保请求体被正确转发，不做额外编码处理
+        onProxyReq: (proxyReq, req, res) => {
+          // 确保 Content-Type 带有 charset
+          if (req.headers['content-type'] && !req.headers['content-type'].includes('charset')) {
+            proxyReq.setHeader('Content-Type', req.headers['content-type'] + '; charset=utf-8');
+          }
+        },
       },
     ],
   },
