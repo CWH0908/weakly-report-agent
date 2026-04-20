@@ -2,7 +2,7 @@
 
 .modalHeader {
   text-align: center;
-  padding: 8px 0 24px;
+  padding: 8px 0 20px;
 }
 
 .modalIcon {
@@ -31,7 +31,208 @@
   color: $text-tertiary;
 }
 
-// 输入框容器 - 统一的圆角边框
+// 路径栏
+.pathBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: $bg-soft;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  color: $text-secondary;
+  transition: all 0.2s;
+  
+  &:hover:not(:disabled) {
+    background: $blue-50;
+    color: $blue-500;
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.currentPath {
+  flex: 1;
+  font-size: 13px;
+  color: $text-secondary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 文件夹列表
+.folderList {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid $border-soft;
+  border-radius: 10px;
+  background: white;
+}
+
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.folderItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-bottom: 1px solid $border-lighter;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: $bg-soft;
+  }
+  
+  &.selected {
+    background: rgba($blue-500, 0.08);
+    
+    .folderIcon {
+      color: $blue-500;
+    }
+    
+    .folderName {
+      color: $blue-600;
+      font-weight: 500;
+    }
+  }
+  
+  &.gitRepo {
+    .folderIcon {
+      color: $green-500;
+    }
+  }
+}
+
+.folderIcon {
+  font-size: 18px;
+  color: $yellow-500;
+}
+
+.folderName {
+  flex: 1;
+  font-size: 14px;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gitBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: $green-600;
+  background: rgba($green-500, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  
+  :global(.anticon) {
+    font-size: 10px;
+  }
+}
+
+// 手动输入
+.manualInput {
+  margin-top: 12px;
+  
+  :global {
+    .ant-input-affix-wrapper {
+      border-radius: 10px;
+      border-color: $border-soft;
+      
+      &:hover, &:focus, &-focused {
+        border-color: $blue-400;
+      }
+    }
+    
+    .ant-input-prefix {
+      color: $text-tertiary;
+      margin-right: 8px;
+    }
+  }
+}
+
+// 时间范围选择区
+.dateSection {
+  margin-top: 16px;
+  padding: 14px;
+  background: $bg-soft;
+  border-radius: 10px;
+}
+
+.dateSectionTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  :global(.anticon) {
+    color: $blue-500;
+  }
+}
+
+.quickDates {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  
+  :global {
+    .ant-btn {
+      border-radius: 6px;
+      font-size: 12px;
+    }
+  }
+}
+
+.datePickers {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  
+  :global {
+    .ant-picker {
+      flex: 1;
+      border-radius: 8px;
+    }
+  }
+}
+
+.dateSeparator {
+  color: $text-tertiary;
+  font-size: 13px;
+  padding: 0 4px;
+}
+
+// 旧的输入框样式（保留兼容）
 .input {
   margin-top: 4px;
   background: $bg-soft;

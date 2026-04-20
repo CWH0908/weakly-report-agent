@@ -4,6 +4,7 @@
 // ============================================
 
 // 核心色板 - 清新浅蓝色系
+$blue-50: #f0f9ff;
 $blue-100: #e0f2fe;
 $blue-200: #bae6fd;
 $blue-300: #7dd3fc;
@@ -17,6 +18,11 @@ $violet-200: #ddd6fe;
 $violet-300: #c4b5fd;
 $violet-400: #a78bfa;
 $violet-500: #8b5cf6;
+
+// 功能色 - 绿色/黄色
+$green-500: #22c55e;
+$green-600: #16a34a;
+$yellow-500: #eab308;
 
 // 点缀色
 $cyan-300: #67e8f9;
@@ -48,6 +54,8 @@ $text-muted: #cbd5e1;
 
 // 边框色
 $border-light: rgba(0, 0, 0, 0.06);
+$border-soft: rgba(0, 0, 0, 0.08);
+$border-lighter: rgba(0, 0, 0, 0.05);
 $border-default: rgba(0, 0, 0, 0.1);
 $border-hover: rgba(0, 0, 0, 0.15);
 $border-blue: rgba($blue-500, 0.3);

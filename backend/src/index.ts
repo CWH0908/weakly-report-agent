@@ -6,6 +6,7 @@ import compression from 'compression';
 import gitRouter from './routes/git.js';
 import chatRouter from './routes/chat.js';
 import reportRouter from './routes/report.js';
+import fsRouter from './routes/fs.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +39,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/git', gitRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/report', reportRouter);
+app.use('/api/fs', fsRouter);
 
 // 健康检查
 app.get('/health', (req, res) => {

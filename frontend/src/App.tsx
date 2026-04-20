@@ -12,7 +12,7 @@ import { analyzeGit, exportReport, downloadReport } from './services/api';
 import Header from './components/Header';
 import WelcomeScreen from './components/WelcomeScreen';
 import ChatMessages from './components/ChatMessages';
-import PathModal from './components/PathModal';
+import PathModal, { DateRange } from './components/PathModal';
 
 // 样式
 import './styles/global.scss';
@@ -32,7 +32,7 @@ const App: React.FC = () => {
   }, []);
 
   // 分析项目
-  const handleAnalyze = useCallback(async () => {
+  const handleAnalyze = useCallback(async (dateRange: DateRange) => {
     if (!repoPath.trim()) {
       message.warning('请输入项目路径');
       return;
@@ -41,14 +41,7 @@ const App: React.FC = () => {
     setAnalyzing(true);
     setPathModalOpen(false);
 
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    const since = monday.toISOString().split('T')[0];
-    const until = sunday.toISOString().split('T')[0];
+    const { since, until } = dateRange;
 
     chatActions.addUserMessage(`分析项目: ${repoPath}`);
     const messageId = chatActions.startAssistantMessage();

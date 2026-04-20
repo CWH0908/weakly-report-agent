@@ -1,6 +1,3 @@
-import { streamText } from 'ai';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-
 export interface AIStreamOptions {
   messages: Array<{ role: string; content: string }>;
   model?: string;
@@ -9,49 +6,94 @@ export interface AIStreamOptions {
 }
 
 export class AIClient {
-  private openrouter;
-  private defaultModel = 'google/gemini-2.0-flash-exp:free';
+  private apiKey: string;
+  // 2026年4月可用的免费模型
+  private defaultModel = 'nvidia/nemotron-3-super-120b-a12b:free';
   private backupModels = [
-    'qwen/qwen3-235b-a22b:free',        // 千问3 235B
-    'qwen/qwen3-30b-a3b:free',          // 千问3 30B
-    'qwen/qwen-2.5-coder-32b-instruct:free', // 千问2.5 Coder
-    'google/gemma-3-27b-it:free',
+    'google/gemma-4-26b-a4b-it:free',       // Gemma 4 26B
+    'google/gemma-4-31b-it:free',           // Gemma 4 31B
+    'nvidia/nemotron-3-nano-30b-a3b:free',  // Nemotron 3 Nano 30B
+    'nvidia/nemotron-nano-9b-v2:free',      // Nemotron Nano 9B
+    'nvidia/nemotron-nano-12b-v2-vl:free',  // Nemotron Nano 12B VL
     'meta-llama/llama-3.3-70b-instruct:free',
     'mistralai/mistral-small-3.1-24b-instruct:free',
-    'deepseek/deepseek-r1-0528:free',
-    'microsoft/phi-4-reasoning-plus:free',
+    'qwen/qwen3-4b:free',                   // Qwen3 4B
   ];
 
   constructor(apiKey?: string) {
-    const key = apiKey || process.env['OPENROUTER_API_KEY'];
-    if (!key) {
+    this.apiKey = apiKey || process.env['OPENROUTER_API_KEY'] || '';
+    if (!this.apiKey) {
       console.warn('警告: 未设置 OPENROUTER_API_KEY，AI功能将无法使用');
     }
-
-    this.openrouter = createOpenRouter({
-      apiKey: key || 'dummy-key',
-    });
   }
 
   /**
-   * 用单个模型进行流式生成
-   * maxRetries: 0 禁用 SDK 内置重试，由我们自己的 fallback 逻辑处理
+   * 用原生 HTTP 进行流式生成
    */
-  private createStream(options: AIStreamOptions & { model: string }) {
+  private async *createStream(
+    options: AIStreamOptions & { model: string },
+  ): AsyncGenerator<string> {
     const { messages, model, temperature = 0.7, maxTokens = 2000 } = options;
 
-    return streamText({
-      model: this.openrouter(model),
-      messages: messages as any,
-      temperature,
-      maxTokens,
-      maxRetries: 0, // 禁用内置重试，由 fallback 机制接管
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+        'HTTP-Referer': 'https://weekly-report-agent.local',
+        'X-Title': 'Weekly Report Agent',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        stream: true,
+      }),
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 200)}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('无法获取响应流');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed === 'data: [DONE]') continue;
+        if (!trimmed.startsWith('data: ')) continue;
+
+        try {
+          const json = JSON.parse(trimmed.slice(6));
+          const content = json.choices?.[0]?.delta?.content;
+          if (content) {
+            yield content;
+          }
+        } catch {
+          // 忽略解析错误的行
+        }
+      }
+    }
   }
 
   /**
    * 带降级的流式聊天
-   * 逐个尝试模型，失败立即切换下一个（不做内置重试），速度快
+   * 逐个尝试模型，失败立即切换下一个，速度快
    */
   async streamWithFallback(
     options: AIStreamOptions,
@@ -63,14 +105,13 @@ export class AIClient {
     for (const model of models) {
       try {
         console.log(`[AI] 尝试模型: ${model}`);
-        const result = this.createStream({ ...options, model });
 
         let hasOutput = false;
         let chunkCount = 0;
-        for await (const chunk of result.textStream) {
+
+        for await (const chunk of this.createStream({ ...options, model })) {
           hasOutput = true;
           chunkCount++;
-          // 记录所有 chunk 的信息
           console.log(`[AI] chunk #${chunkCount}: len=${chunk.length}, text="${chunk.slice(0, 50).replace(/\n/g, '\\n')}${chunk.length > 50 ? '...' : ''}"`);
           onChunk(chunk);
         }

@@ -3,6 +3,43 @@ import { ENABLE_MOCK, getMockGitData } from './mock';
 
 const API_BASE = '/api';
 
+// 目录项类型
+export interface DirItem {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  isGitRepo?: boolean;
+}
+
+// 目录列表响应
+export interface DirListResponse {
+  success: boolean;
+  path: string;
+  parent: string | null;
+  items: DirItem[];
+  error?: string;
+}
+
+// 获取目录列表
+export async function listDirectory(dirPath?: string): Promise<DirListResponse> {
+  try {
+    const url = dirPath 
+      ? `${API_BASE}/fs/list?path=${encodeURIComponent(dirPath)}`
+      : `${API_BASE}/fs/list`;
+    
+    const response = await fetch(url);
+    return response.json();
+  } catch (err) {
+    return { 
+      success: false, 
+      path: dirPath || '',
+      parent: null,
+      items: [],
+      error: err instanceof Error ? err.message : '请求失败' 
+    };
+  }
+}
+
 export async function analyzeGit(config: GitConfig): Promise<{
   success: boolean;
   data?: GitAnalysisResult;

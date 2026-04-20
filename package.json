@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "dev": "run-p dev:*",
+    "dev:frontend": "cd frontend && pnpm dev",
+    "dev:backend": "cd backend && pnpm dev",
+    "build": "cd frontend && pnpm build",
+    "install:all": "pnpm install && cd frontend && pnpm install && cd ../backend && pnpm install"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "npm-run-all2": "^8.0.4"
   }
 }
